@@ -35,18 +35,22 @@ pub(super) fn plugin(app: &mut App) {
 
 /// Update the sprite direction and animation state (idling/walking).
 fn update_animation_movement(
-    mut player_query: Query<(&MovementController, &mut Sprite, &mut PlayerAnimation)>,
+    mut player_query: Query<(&MovementController, &mut PlayerAnimation)>,
 ) {
-    for (controller, mut sprite, mut animation) in &mut player_query {
+    for (controller, mut animation) in &mut player_query {
         let dx = controller.intent.x;
-        if dx != 0.0 {
-            sprite.flip_x = dx < 0.0;
-        }
+        let dy = controller.intent.y;
 
         let animation_state = if controller.intent == Vec2::ZERO {
             PlayerAnimationState::Idling
+        } else if dx > 0.0 {
+            PlayerAnimationState::WalkingRight
+        } else if dx < 0.0 {
+            PlayerAnimationState::WalkingLeft
+        } else if dy > 0.0 {
+            PlayerAnimationState::WalkingUp
         } else {
-            PlayerAnimationState::Walking
+            PlayerAnimationState::WalkingDown
         };
         animation.update_state(animation_state);
     }
@@ -76,9 +80,9 @@ fn trigger_step_sound_effect(
     mut step_query: Query<&PlayerAnimation>,
 ) {
     for animation in &mut step_query {
-        if animation.state == PlayerAnimationState::Walking
+        if animation.state == PlayerAnimationState::WalkingDown 
             && animation.changed()
-            && (animation.frame == 2 || animation.frame == 5)
+            && (animation.frame == 2 || animation.frame == 5) // TODO: update the condition here
         {
             let rng = &mut rand::thread_rng();
             let random_step = player_assets.steps.choose(rng).unwrap();
@@ -106,18 +110,36 @@ pub struct PlayerAnimation {
 #[derive(Reflect, PartialEq)]
 pub enum PlayerAnimationState {
     Idling,
-    Walking,
+    WalkingDown,
+    WalkingLeft,
+    WalkingRight,
+    WalkingUp,
+    Hitchhiking
 }
 
 impl PlayerAnimation {
     /// The number of idle frames.
-    const IDLE_FRAMES: usize = 2;
+    const IDLE_FRAMES: usize = 1; // TODO: add idle frames
     /// The duration of each idle frame.
     const IDLE_INTERVAL: Duration = Duration::from_millis(500);
+
     /// The number of walking frames.
-    const WALKING_FRAMES: usize = 6;
+    const WALKING_FRAMES: usize = 9;
     /// The duration of each walking frame.
     const WALKING_INTERVAL: Duration = Duration::from_millis(50);
+    /// The start index of walking frame (up).
+    const WALKING_UP_IDX: usize = 0;
+    /// The start index of walking frame (left).
+    const WALKING_LEFT_IDX: usize = 9;
+    /// The start index of walking frame (down).
+    const WALKING_DOWN_IDX: usize = 18;
+    /// The start index of walking frame (right).
+    const WALKING_RIGHT_IDX: usize = 27;
+
+    /// The number of hitchhiking frames.
+    const HITCHHIKING_FRAMES: usize = 1; // TODO: add hitchhiking frames
+    /// The duration of each hitchhiking frame.
+    const HITCHHIKING_INTERVAL: Duration = Duration::from_millis(50);
 
     fn idling() -> Self {
         Self {
@@ -127,11 +149,19 @@ impl PlayerAnimation {
         }
     }
 
-    fn walking() -> Self {
+    fn walking(state: PlayerAnimationState) -> Self {
         Self {
             timer: Timer::new(Self::WALKING_INTERVAL, TimerMode::Repeating),
             frame: 0,
-            state: PlayerAnimationState::Walking,
+            state,
+        }
+    }
+
+    fn hitchhiking() -> Self {
+        Self {
+            timer: Timer::new(Self::HITCHHIKING_INTERVAL, TimerMode::Once),
+            frame: 0,
+            state: PlayerAnimationState::Hitchhiking,
         }
     }
 
@@ -148,7 +178,11 @@ impl PlayerAnimation {
         self.frame = (self.frame + 1)
             % match self.state {
                 PlayerAnimationState::Idling => Self::IDLE_FRAMES,
-                PlayerAnimationState::Walking => Self::WALKING_FRAMES,
+                PlayerAnimationState::WalkingLeft => Self::WALKING_FRAMES,
+                PlayerAnimationState::WalkingRight => Self::WALKING_FRAMES,
+                PlayerAnimationState::WalkingUp => Self::WALKING_FRAMES,
+                PlayerAnimationState::WalkingDown => Self::WALKING_FRAMES,
+                PlayerAnimationState::Hitchhiking => Self::HITCHHIKING_FRAMES,
             };
     }
 
@@ -157,7 +191,11 @@ impl PlayerAnimation {
         if self.state != state {
             match state {
                 PlayerAnimationState::Idling => *self = Self::idling(),
-                PlayerAnimationState::Walking => *self = Self::walking(),
+                PlayerAnimationState::WalkingLeft => *self = Self::walking(PlayerAnimationState::WalkingLeft),
+                PlayerAnimationState::WalkingRight => *self = Self::walking(PlayerAnimationState::WalkingRight),
+                PlayerAnimationState::WalkingUp => *self = Self::walking(PlayerAnimationState::WalkingUp),
+                PlayerAnimationState::WalkingDown => *self = Self::walking(PlayerAnimationState::WalkingDown),
+                PlayerAnimationState::Hitchhiking => *self = Self::hitchhiking(),
             }
         }
     }
@@ -170,8 +208,12 @@ impl PlayerAnimation {
     /// Return sprite index in the atlas.
     pub fn get_atlas_index(&self) -> usize {
         match self.state {
-            PlayerAnimationState::Idling => self.frame,
-            PlayerAnimationState::Walking => 6 + self.frame,
+            PlayerAnimationState::Idling => Self::WALKING_DOWN_IDX + self.frame,
+            PlayerAnimationState::Hitchhiking => Self::WALKING_DOWN_IDX + self.frame,
+            PlayerAnimationState::WalkingLeft => Self::WALKING_LEFT_IDX + self.frame,
+            PlayerAnimationState::WalkingRight => Self::WALKING_RIGHT_IDX + self.frame,
+            PlayerAnimationState::WalkingUp => Self::WALKING_UP_IDX + self.frame,
+            PlayerAnimationState::WalkingDown => Self::WALKING_DOWN_IDX + self.frame,
         }
     }
 }
