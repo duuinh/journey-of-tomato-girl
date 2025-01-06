@@ -128,13 +128,13 @@ impl PlayerAnimation {
     /// The duration of each walking frame.
     const WALKING_INTERVAL: Duration = Duration::from_millis(50);
     /// The start index of walking frame (up).
-    const WALKING_UP_IDX: usize = 0;
+    const WALKING_UP_IDX: usize = 104;
     /// The start index of walking frame (left).
-    const WALKING_LEFT_IDX: usize = 9;
+    const WALKING_LEFT_IDX: usize = 117;
     /// The start index of walking frame (down).
-    const WALKING_DOWN_IDX: usize = 18;
+    const WALKING_DOWN_IDX: usize = 130;
     /// The start index of walking frame (right).
-    const WALKING_RIGHT_IDX: usize = 27;
+    const WALKING_RIGHT_IDX: usize = 143;
 
     /// The number of hitchhiking frames.
     const HITCHHIKING_FRAMES: usize = 1; // TODO: add hitchhiking frames
