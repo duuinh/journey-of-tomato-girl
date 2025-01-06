@@ -41,6 +41,8 @@ pub struct MovementController {
     /// 1 world unit = 1 pixel when using the default 2D camera and no physics
     /// engine.
     pub max_speed: f32,
+
+    pub is_hitchhiking: bool,
 }
 
 impl Default for MovementController {
@@ -49,6 +51,7 @@ impl Default for MovementController {
             intent: Vec2::ZERO,
             // 400 pixels per second is a nice default, but we can still vary this per character.
             max_speed: 400.0,
+            is_hitchhiking: false,
         }
     }
 }

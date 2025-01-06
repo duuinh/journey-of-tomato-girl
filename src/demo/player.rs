@@ -22,10 +22,10 @@ pub(super) fn plugin(app: &mut App) {
     app.register_type::<Player>();
     app.load_resource::<PlayerAssets>();
 
-    // Record directional input as movement controls.
+    // Record button input as movement controls.
     app.add_systems(
         Update,
-        record_player_directional_input.in_set(AppSet::RecordInput),
+        record_player_button_input.in_set(AppSet::RecordInput),
     );
 }
 
@@ -57,7 +57,7 @@ fn spawn_player(
     // can specify which section of the image we want to see. We will use this
     // to animate our player character. You can learn more about texture atlases in
     // this example: https://github.com/bevyengine/bevy/blob/latest/examples/2d/texture_atlas.rs
-    let layout = TextureAtlasLayout::from_grid(UVec2::splat(64), 13, 21, Some(UVec2::splat(1)), None);
+    let layout = TextureAtlasLayout::from_grid(UVec2::splat(62), 9, 8, Some(UVec2::splat(1)), None);
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_animation = PlayerAnimation::new();
 
@@ -83,23 +83,29 @@ fn spawn_player(
     ));
 }
 
-fn record_player_directional_input(
+fn record_player_button_input(
     input: Res<ButtonInput<KeyCode>>,
     mut controller_query: Query<&mut MovementController, With<Player>>,
 ) {
-    // Collect directional input.
-    let mut intent = Vec2::ZERO;
-    if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
-        intent.y += 1.0;
-    }
-    if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
-        intent.y -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
-        intent.x -= 1.0;
-    }
-    if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
-        intent.x += 1.0;
+    let mut intent: Vec2 = Vec2::ZERO;
+    let mut is_spacebar_pressed = false;
+
+    if input.pressed(KeyCode::Space) {
+        is_spacebar_pressed = true;
+    } else {
+        // Collect directional input.
+        if input.pressed(KeyCode::KeyW) || input.pressed(KeyCode::ArrowUp) {
+            intent.y += 1.0;
+        }
+        if input.pressed(KeyCode::KeyS) || input.pressed(KeyCode::ArrowDown) {
+            intent.y -= 1.0;
+        }
+        if input.pressed(KeyCode::KeyA) || input.pressed(KeyCode::ArrowLeft) {
+            intent.x -= 1.0;
+        }
+        if input.pressed(KeyCode::KeyD) || input.pressed(KeyCode::ArrowRight) {
+            intent.x += 1.0;
+        }
     }
 
     // Normalize so that diagonal movement has the same speed as
@@ -110,6 +116,7 @@ fn record_player_directional_input(
     // Apply movement intent to controllers.
     for mut controller in &mut controller_query {
         controller.intent = intent;
+        controller.is_hitchhiking = is_spacebar_pressed;
     }
 }
 

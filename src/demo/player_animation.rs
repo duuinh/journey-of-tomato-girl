@@ -41,8 +41,11 @@ fn update_animation_movement(
         let dx = controller.intent.x;
         let dy = controller.intent.y;
 
-        let animation_state = if controller.intent == Vec2::ZERO {
+        let animation_state = 
+        if controller.intent == Vec2::ZERO && !controller.is_hitchhiking {
             PlayerAnimationState::Idling
+        } else if controller.intent == Vec2::ZERO && controller.is_hitchhiking {
+            PlayerAnimationState::Hitchhiking
         } else if dx > 0.0 {
             PlayerAnimationState::WalkingRight
         } else if dx < 0.0 {
@@ -119,7 +122,7 @@ pub enum PlayerAnimationState {
 
 impl PlayerAnimation {
     /// The number of idle frames.
-    const IDLE_FRAMES: usize = 1; // TODO: add idle frames
+    const IDLE_FRAMES: usize = 1;
     /// The duration of each idle frame.
     const IDLE_INTERVAL: Duration = Duration::from_millis(500);
 
@@ -128,18 +131,20 @@ impl PlayerAnimation {
     /// The duration of each walking frame.
     const WALKING_INTERVAL: Duration = Duration::from_millis(50);
     /// The start index of walking frame (up).
-    const WALKING_UP_IDX: usize = 104;
+    const WALKING_UP_IDX: usize = 0;
     /// The start index of walking frame (left).
-    const WALKING_LEFT_IDX: usize = 117;
+    const WALKING_LEFT_IDX: usize = 9;
     /// The start index of walking frame (down).
-    const WALKING_DOWN_IDX: usize = 130;
+    const WALKING_DOWN_IDX: usize = 18;
     /// The start index of walking frame (right).
-    const WALKING_RIGHT_IDX: usize = 143;
+    const WALKING_RIGHT_IDX: usize = 27;
 
     /// The number of hitchhiking frames.
-    const HITCHHIKING_FRAMES: usize = 1; // TODO: add hitchhiking frames
+    const HITCHHIKING_FRAMES: usize = 1;
     /// The duration of each hitchhiking frame.
-    const HITCHHIKING_INTERVAL: Duration = Duration::from_millis(50);
+    const HITCHHIKING_INTERVAL: Duration = Duration::from_millis(1);
+    /// The index of hitchhiking frame.
+    const HITCHHIKING_IDX: usize = 49;
 
     fn idling() -> Self {
         Self {
@@ -159,7 +164,7 @@ impl PlayerAnimation {
 
     fn hitchhiking() -> Self {
         Self {
-            timer: Timer::new(Self::HITCHHIKING_INTERVAL, TimerMode::Once),
+            timer: Timer::new(Self::HITCHHIKING_INTERVAL, TimerMode::Repeating),
             frame: 0,
             state: PlayerAnimationState::Hitchhiking,
         }
@@ -209,7 +214,7 @@ impl PlayerAnimation {
     pub fn get_atlas_index(&self) -> usize {
         match self.state {
             PlayerAnimationState::Idling => Self::WALKING_DOWN_IDX + self.frame,
-            PlayerAnimationState::Hitchhiking => Self::WALKING_DOWN_IDX + self.frame,
+            PlayerAnimationState::Hitchhiking => Self::HITCHHIKING_IDX + self.frame,
             PlayerAnimationState::WalkingLeft => Self::WALKING_LEFT_IDX + self.frame,
             PlayerAnimationState::WalkingRight => Self::WALKING_RIGHT_IDX + self.frame,
             PlayerAnimationState::WalkingUp => Self::WALKING_UP_IDX + self.frame,
