@@ -3,8 +3,8 @@
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 use crate::{
-    asset_tracking::LoadResource, audio::Music, demo::level::spawn_level as spawn_level_command,
-    screens::Screen,
+    asset_tracking::LoadResource, audio::Music, demo::level::spawn_level as spawn_level_command, 
+    move_camera, screens::Screen, stop_camera
 };
 
 pub(super) fn plugin(app: &mut App) {
@@ -13,6 +13,9 @@ pub(super) fn plugin(app: &mut App) {
     app.load_resource::<GameplayMusic>();
     app.add_systems(OnEnter(Screen::Gameplay), play_gameplay_music);
     app.add_systems(OnExit(Screen::Gameplay), stop_music);
+
+    app.add_systems(OnEnter(Screen::Gameplay), stop_camera);
+    app.add_systems(OnExit(Screen::Gameplay), move_camera);
 
     app.add_systems(
         Update,

@@ -306,6 +306,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-parallax"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6204ca0c4229c8b81278944512e7bcee569b7f5218bc872cfee2b4f02b7b0fe"
+dependencies = [
+ "bevy",
+ "serde",
+]
+
+[[package]]
 name = "bevy_a11y"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2281,6 +2291,7 @@ name = "journey_of_tomato_girl"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-parallax",
  "log",
  "rand",
  "tracing",
