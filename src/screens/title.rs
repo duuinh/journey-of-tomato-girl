@@ -1,6 +1,6 @@
 //! The title screen that appears when the game starts.
 
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::ContentSize};
 
 use crate::{screens::Screen, theme::prelude::*};
 
@@ -10,10 +10,15 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_title_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font_handle = asset_server.load(style::DEFAULT_FONT);
+    let image_handle = asset_server.load("images/logo.png");
     commands
         .ui_root()
         .insert(StateScoped(Screen::Title))
         .with_children(|children| {
+            children.spawn(ImageBundle {
+                image: UiImage { texture: image_handle.clone() , ..Default::default() },
+                ..Default::default()
+            });
             children.button("Play", font_handle.clone()).observe(enter_gameplay_screen);
             children.button("Credits", font_handle.clone()).observe(enter_credits_screen);
 
