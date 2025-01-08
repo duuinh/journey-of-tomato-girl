@@ -51,6 +51,7 @@ fn spawn_player(
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    query: Query<&Transform, With<Camera>>,
 ) {
     // A texture atlas is a way to split one image with a grid into multiple
     // sprites. By attaching it to a [`SpriteBundle`] and providing an index, we
@@ -61,12 +62,15 @@ fn spawn_player(
     let texture_atlas_layout = texture_atlas_layouts.add(layout);
     let player_animation = PlayerAnimation::new();
 
+    let camera_position: Vec3 = query.iter().next().unwrap().translation;
+
     commands.spawn((
         Name::new("Player"),
         Player,
         SpriteBundle {
             texture: player_assets.girl.clone(),
-            transform: Transform::from_scale(Vec2::splat(2.0).extend(1.0)), // resize here
+            transform: Transform::from_scale(Vec2::splat(2.0).extend(1.0)) // Resize here
+                            .with_translation(Vec3::new(camera_position.x, camera_position.y-200.0, 1.0)), 
             ..Default::default()
         },
         TextureAtlas {
