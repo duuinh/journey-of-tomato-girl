@@ -6,12 +6,14 @@
 pub mod interaction;
 pub mod palette;
 mod widgets;
+pub mod style;
 
 #[allow(unused_imports)]
 pub mod prelude {
     pub use super::{
         interaction::{InteractionPalette, OnPress},
         palette as ui_palette,
+        style,
         widgets::{Containers as _, Widgets as _},
     };
 }

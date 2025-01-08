@@ -1,0 +1,1 @@
+pub const DEFAULT_FONT: &str = "fonts/Roundberly.ttf";

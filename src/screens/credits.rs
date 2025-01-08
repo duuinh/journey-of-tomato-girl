@@ -12,22 +12,24 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnExit(Screen::Credits), stop_music);
 }
 
-fn spawn_credits_screen(mut commands: Commands) {
+fn spawn_credits_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font_handle = asset_server.load(style::DEFAULT_FONT);
+
     commands
         .ui_root()
         .insert(StateScoped(Screen::Credits))
         .with_children(|children| {
-            children.header("Made by");
-            children.label("Joe Shmoe - Implemented aligator wrestling AI");
-            children.label("Jane Doe - Made the music for the alien invasion");
+            children.header("Made by", font_handle.clone());
+            children.label("Joe Shmoe - Implemented aligator wrestling AI", font_handle.clone());
+            children.label("Jane Doe - Made the music for the alien invasion", font_handle.clone());
 
-            children.header("Assets");
-            children.label("Bevy logo - All rights reserved by the Bevy Foundation. Permission granted for splash screen use when unmodified.");
-            children.label("Ducky sprite - CC0 by Caz Creates Games");
-            children.label("Button SFX - CC0 by Jaszunio15");
-            children.label("Music - CC BY 3.0 by Kevin MacLeod");
+            children.header("Assets", font_handle.clone());
+            children.label("Bevy logo - All rights reserved by the Bevy Foundation. Permission granted for splash screen use when unmodified.", font_handle.clone());
+            children.label("Ducky sprite - CC0 by Caz Creates Games", font_handle.clone());
+            children.label("Button SFX - CC0 by Jaszunio15", font_handle.clone());
+            children.label("Music - CC BY 3.0 by Kevin MacLeod", font_handle.clone());
 
-            children.button("Back").observe(enter_title_screen);
+            children.button("Back", font_handle.clone()).observe(enter_title_screen);
         });
 }
 

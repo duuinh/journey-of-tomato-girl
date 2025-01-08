@@ -18,12 +18,14 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
-fn spawn_loading_screen(mut commands: Commands) {
+fn spawn_loading_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font_handle = asset_server.load(style::DEFAULT_FONT);
+
     commands
         .ui_root()
         .insert(StateScoped(Screen::Loading))
         .with_children(|children| {
-            children.label("Loading...").insert(Style {
+            children.label("Loading...", font_handle.clone()).insert(Style {
                 justify_content: JustifyContent::Center,
                 ..default()
             });
